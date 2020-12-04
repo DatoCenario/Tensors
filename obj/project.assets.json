@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/media/devil/DATA/CODE/c#/Test/Test.csproj",
+      "projectUniqueName": "/media/devil/DATA/CODE/c#/Tensors/Test.csproj",
       "projectName": "Test",
-      "projectPath": "/media/devil/DATA/CODE/c#/Test/Test.csproj",
+      "projectPath": "/media/devil/DATA/CODE/c#/Tensors/Test.csproj",
       "packagesPath": "/root/.nuget/packages/",
-      "outputPath": "/media/devil/DATA/CODE/c#/Test/obj/",
+      "outputPath": "/media/devil/DATA/CODE/c#/Tensors/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/root/.nuget/NuGet/NuGet.Config"

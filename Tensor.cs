@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
-namespace Test
+namespace Tensors
 {
     public class Tensor<T>
     {
@@ -12,7 +12,11 @@ namespace Test
 
         public int DimensionsCount => _dimensions.Length;
 
-        public int GetLength(int dimIndex) => _dimensions[dimIndex];
+        public int GetLength(int dimensionIndexex) => _dimensions[dimensionIndexex];
+
+        public IEnumerable<T> GetSource() => _source.Select(v => v);
+
+        public IEnumerable<int> Dimensions => _dimensions.Select(d => d);
 
         public Tensor(params int[] dimensions)
         {
@@ -102,50 +106,40 @@ namespace Test
 
             var dimensions = Enumerable.Range(0, startPoint.Length)
                 .Select(i => Math.Abs(endPoint[i] - startPoint[i]) + 1)
-                .Where(i => i != 0)
+                .Where(i => i != 1)
                 .ToArray();
 
-            var source = GetAllIndexesBetweenPoints(startPoint, endPoint)
-                .Reverse()
+            var indexes = startPoint.Select(v => v).ToArray();
+            var source = GetCropIndexesRecursive(startPoint, endPoint, startPoint.Length - 1, indexes)
                 .Select(i => GetItem(i))
                 .ToArray();
 
             return new Tensor<T>(dimensions, source);
         }
 
-
-        public IEnumerable<int[]> GetAllIndexesBetweenPoints(int[] startPoint, int[] endPoint)
+        private IEnumerable<int[]> GetCropIndexesRecursive(int[] startPoint, int[] endPoint, int dimensionIndex,
+            int[] indexes)
         {
-            var stack = new Stack<Tuple<int[], int>>();
-            stack.Push(Tuple.Create(startPoint, 0));
-
-            while (stack.Count != 0)
+            if (dimensionIndex == -1)
             {
-                var current = stack.Pop();
-                var indexes = current.Item1;
-                var dimensionIndex = current.Item2;
+                yield return indexes;
+                yield break;
+            }
+            else
+            {
+                int delta = endPoint[dimensionIndex] - startPoint[dimensionIndex];
+                int count = Math.Abs(delta);
+                int dirrection = delta == 0 ? 0 : delta / count;
 
-                if (dimensionIndex != startPoint.Length)
+                for (int i = 0; i <= count; i++)
                 {
-                    int delta = endPoint[dimensionIndex] - startPoint[dimensionIndex];
-                    int count = Math.Abs(delta);
-                    int dirrection = delta / (count == 0 ? 1 : count);
+                    int increment = i * dirrection;
+                    indexes[dimensionIndex] += increment;
 
-                    var newIndexes = new int[startPoint.Length];
-                    indexes.CopyTo(newIndexes, 0);
-                    stack.Push(Tuple.Create(newIndexes, dimensionIndex + 1));
+                    foreach (var item in GetCropIndexesRecursive(startPoint, endPoint, dimensionIndex - 1, indexes))
+                        yield return item;
 
-                    for (int i = 0; i < count; i++)
-                    {
-                        newIndexes = new int[startPoint.Length];
-                        indexes.CopyTo(newIndexes, 0);
-                        newIndexes[dimensionIndex] += (i + 1) * dirrection;
-                        stack.Push(Tuple.Create(newIndexes, dimensionIndex + 1));
-                    }
-                }
-                else
-                {
-                    yield return indexes;
+                    indexes[dimensionIndex] -= increment;
                 }
             }
         }
